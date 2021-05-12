@@ -25,8 +25,9 @@
 ;; start is called by init and after code reloading finishes
 (defn ^:dev/after-load start []
   (doseq [input inputs]
-    (-> input (.addEventListener "mouseover" handle-update))
-    (-> input (.addEventListener "change" #(do (tap> %)
+    (-> input (.addEventListener "mouseover" handle-update)))
+  (doseq [input inputs]
+    (-> input (.addEventListener "change" handle-update)))
   (js/console.log "start"))
 
 (defn init []
