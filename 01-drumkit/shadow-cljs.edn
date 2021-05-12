@@ -2,8 +2,7 @@
 {:source-paths
  ["src"]
 
- :dependencies
- []
+ :deps true
 
  :dev-http
  {8020 "public"}
