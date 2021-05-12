@@ -31,10 +31,6 @@
 (set! (.-lineCap ctx) "round")
 (set! (.-lineWidth ctx) 100)
 
-;; Check
-(comment
-  (log ctx))
-
 (def state
   (atom
    {:is-drawing false
@@ -43,6 +39,31 @@
     :hue        0
     :direction true}))
 
+(defn draw [e]
+  (when (:is-drawing @state)
+    (log e)
+    (set! (.-strokeStyle ctx) (str "hsl(" (:hue @state) ", 100%, 50%)"))
+    (.beginPath ctx)
+    ;; start from
+    (.moveTo ctx (:last-x @state) (:last-y @state))
+    ;; go to
+    (.lineTo ctx (.-offsetX e) (.-offsetY e))
+    (.stroke ctx)
+    (swap! state merge {:last-x (.-offsetX e)
+                        :last-y (.-offsetY e)})
+
+    (swap! state update :hue inc)
+    (when (< 360 (:hue @state))
+      (swap! state assoc :hue 0))
+
+    (when (or (<= 100 (.-lineWidth ctx))
+              (<= (.-lineWidth ctx) 1))
+      (swap! state update :direction not))
+
+    (if (:direction @state)
+      (set! (.-lineWidth ctx) (inc (.-lineWidth ctx)))
+      (set! (.-lineWidth ctx) (dec (.-lineWidth ctx))))))
+
 (-> canvas
     (.addEventListener "mousedown"
                        #(swap! state merge {:is-drawing true
@@ -50,30 +71,12 @@
                                             :last-y (.-offsetY %)})))
 
 (-> canvas
-    (.addEventListener "mouseout" #(swap! state assoc :is-drawing false)))
+    (.addEventListener "mouseout"
+                       #(swap! state assoc :is-drawing false)))
 
 (-> canvas
-    (.addEventListener "mouseup" #(swap! state assoc :is-drawing false)))
-
-(defn draw [e]
-  (when (:is-drawing @state)
-    (set! (.-strokeStyle ctx) (str "hsl(" (:hue @state) ", 100%, 50%)"))
-    (.beginPath ctx)
-    (.moveTo ctx (:last-x @state) (:last-y @state))
-    (.lineTo ctx (.-offsetX e) (.-offsetY e))
-    (.stroke ctx)
-    (swap! state merge {:last-x (.-offsetX e)
-                        :last-y (.-offsetY e)})
-    (swap! state update :hue inc)
-    (when (< 360 (:hue @state))
-      (swap! state assoc :hue 0))
-    (when (or (<= 100 (.-lineWidth ctx))
-              (<= (.-lineWidth ctx) 1))
-      (swap! state update :direction not))
-    (if (:direction @state)
-      (set! (.-lineWidth ctx) (inc (.-lineWidth ctx)))
-      (set! (.-lineWidth ctx) (dec (.-lineWidth ctx))))
-    ))
+    (.addEventListener "mouseup"
+                       #(swap! state assoc :is-drawing false)))
 
 (-> canvas
     (.addEventListener "mousemove" draw))
