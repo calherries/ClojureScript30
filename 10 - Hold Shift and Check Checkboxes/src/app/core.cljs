@@ -33,7 +33,8 @@
 (defn handle-check [e]
   (this-as this
    (when (and (-> e .-shiftKey)
-              (-> this .-checked))
+              (-> this .-checked)
+              @last-checked)
      (let [in-between-checkboxes (->> checkboxes
                                       (keep-indexed (fn [idx item]
                                                       (when (or (identical? this item)
