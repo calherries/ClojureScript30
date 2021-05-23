@@ -12,6 +12,8 @@
   {:target :browser
    :output-dir "public/js"
    :asset-path "/js"
+   :devtools {:preloads [shadow.remote.runtime.cljs.browser
+                         lambdaisland.dom-types]}
 
    :modules
    {:main ; becomes public/js/main.js
